@@ -19,7 +19,7 @@ function SyntaxHighlightedCode(props) {
             // hljs won't reprocess the element unless this attribute is removed
             ref.current.removeAttribute('data-highlighted')
         }
-    }, [ props.className, props.children ])
+    }, [props.className, props.children])
 
     return <code {...props} ref={ref} />
 }
@@ -29,25 +29,25 @@ const Project = () => {
 
     const location = useLocation()
 
-    const [ isSidePanelOpen, setIsSidePanelOpen ] = useState(false)
-    const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ selectedUserId, setSelectedUserId ] = useState(new Set()) // Initialized as Set
-    const [ project, setProject ] = useState(location.state.project)
-    const [ message, setMessage ] = useState('')
+    const [isSidePanelOpen, setIsSidePanelOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedUserId, setSelectedUserId] = useState(new Set()) // Initialized as Set
+    const [project, setProject] = useState(location.state.project)
+    const [message, setMessage] = useState('')
     const { user } = useContext(UserContext)
     const messageBox = React.createRef()
 
-    const [ users, setUsers ] = useState([])
-    const [ messages, setMessages ] = useState([]) // New state variable for messages
-    const [ fileTree, setFileTree ] = useState({})
+    const [users, setUsers] = useState([])
+    const [messages, setMessages] = useState([]) // New state variable for messages
+    const [fileTree, setFileTree] = useState({})
 
-    const [ currentFile, setCurrentFile ] = useState(null)
-    const [ openFiles, setOpenFiles ] = useState([])
+    const [currentFile, setCurrentFile] = useState(null)
+    const [openFiles, setOpenFiles] = useState([])
 
-    const [ webContainer, setWebContainer ] = useState(null)
-    const [ iframeUrl, setIframeUrl ] = useState(null)
+    const [webContainer, setWebContainer] = useState(null)
+    const [iframeUrl, setIframeUrl] = useState(null)
 
-    const [ runProcess, setRunProcess ] = useState(null)
+    const [runProcess, setRunProcess] = useState(null)
 
     const handleUserClick = (id) => {
         setSelectedUserId(prevSelectedUserId => {
@@ -86,7 +86,7 @@ const Project = () => {
             message,
             sender: user
         })
-        setMessages(prevMessages => [ ...prevMessages, { sender: user, message } ]) // Update messages state
+        setMessages(prevMessages => [...prevMessages, { sender: user, message }]) // Update messages state
         setMessage("")
 
     }
@@ -125,7 +125,7 @@ const Project = () => {
         receiveMessage('project-message', data => {
 
             console.log(data)
-            
+
             if (data.sender._id == 'ai') {
 
 
@@ -138,11 +138,11 @@ const Project = () => {
                 if (message.fileTree) {
                     setFileTree(message.fileTree || {})
                 }
-                setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
+                setMessages(prevMessages => [...prevMessages, data]) // Update messages state
             } else {
 
 
-                setMessages(prevMessages => [ ...prevMessages, data ]) // Update messages state
+                setMessages(prevMessages => [...prevMessages, data]) // Update messages state
             }
         })
 
@@ -265,7 +265,7 @@ const Project = () => {
                                     key={index}
                                     onClick={() => {
                                         setCurrentFile(file)
-                                        setOpenFiles([ ...new Set([ ...openFiles, file ]) ])
+                                        setOpenFiles([...new Set([...openFiles, file])])
                                     }}
                                     className="tree-element cursor-pointer p-2 px-4 flex items-center gap-2 bg-slate-300 w-full">
                                     <p
@@ -301,39 +301,41 @@ const Project = () => {
                         <div className="actions flex gap-2">
                             <button
                                 onClick={async () => {
-                                    await webContainer.mount(fileTree)
+                                    if (!webContainer) {
+                                        console.warn("WebContainer not ready yet!");
+                                        return;
+                                    }
 
+                                    await webContainer.mount(fileTree);
 
-                                    const installProcess = await webContainer.spawn("npm", [ "install" ])
-
-
+                                    const installProcess = await webContainer.spawn("npm", ["install"]);
 
                                     installProcess.output.pipeTo(new WritableStream({
                                         write(chunk) {
-                                            console.log(chunk)
+                                            console.log(chunk);
                                         }
-                                    }))
+                                    }));
 
                                     if (runProcess) {
-                                        runProcess.kill()
+                                        runProcess.kill();
                                     }
 
-                                    let tempRunProcess = await webContainer.spawn("npm", [ "start" ]);
+                                    let tempRunProcess = await webContainer.spawn("npm", ["start"]);
 
                                     tempRunProcess.output.pipeTo(new WritableStream({
                                         write(chunk) {
-                                            console.log(chunk)
+                                            console.log(chunk);
                                         }
-                                    }))
+                                    }));
 
-                                    setRunProcess(tempRunProcess)
+                                    setRunProcess(tempRunProcess);
 
-                                    webContainer.on('server-ready', (port, url) => {
-                                        console.log(port, url)
-                                        setIframeUrl(url)
-                                    })
-
+                                    webContainer.on("server-ready", (port, url) => {
+                                        console.log(port, url);
+                                        setIframeUrl(url);
+                                    });
                                 }}
+
                                 className='p-2 px-4 bg-slate-300 text-white'
                             >
                                 run
@@ -344,7 +346,7 @@ const Project = () => {
                     </div>
                     <div className="bottom flex flex-grow max-w-full shrink overflow-auto">
                         {
-                            fileTree[ currentFile ] && (
+                            fileTree[currentFile] && (
                                 <div className="code-editor-area h-full overflow-auto flex-grow bg-slate-50">
                                     <pre
                                         className="hljs h-full">
@@ -356,7 +358,7 @@ const Project = () => {
                                                 const updatedContent = e.target.innerText;
                                                 const ft = {
                                                     ...fileTree,
-                                                    [ currentFile ]: {
+                                                    [currentFile]: {
                                                         file: {
                                                             contents: updatedContent
                                                         }
